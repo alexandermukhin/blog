@@ -26,9 +26,20 @@ github_username:  jekyll
 
 # Build settings
 markdown: kramdown
-theme: minima
-gems:
-  - jekyll-feed
+permalink: pretty
+
+positive:
+    name: Positive.JS
+
+gems: [jekyll-paginate]
+
 exclude:
   - Gemfile
   - Gemfile.lock
+
+sass:
+    sass_dir: assets/css/_sass
+    style: :compressed
+
+paginate: 1
+paginate_path: "/page/:num"

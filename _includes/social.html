@@ -1,0 +1,54 @@
+<h6>Follow me</h6>
+
+<ul class="social-media">
+
+
+    {% if site.positive.social.twitter %}
+    <li>
+        <a title="{{ site.positive.social.twitter }} on Twitter" 
+            href="https://twitter.com/{{ site.positive.social.twitter }}" 
+            class="twitter wc-img-replace" target="_blank">Twitter</a>
+    </li>   
+    {% endif %}
+
+    {% if site.positive.social.github %}
+    <li>
+        <a title="{{ site.positive.social.github }} on Github" 
+            href="https://github.com/{{ site.positive.social.github }}" 
+            class="github wc-img-replace" target="_blank">Github</a>
+    </li>
+    {% endif %} 
+
+    {% if site.positive.social.facebook %}
+    <li>
+        <a title="{{ site.positive.social.facebook }} on Facebook" 
+            href="https://facebook.com/{{ site.positive.social.facebook }}" 
+            class="facebook wc-img-replace" target="_blank">Facebook</a>
+    </li>
+    {% endif %}
+
+    {% if site.positive.social.gplus %}
+    <li>
+        <a title="{{ site.positive.social.gplus }} on Google Plus" 
+            href="https://plus.google.com/{{ site.positive.social.gplus }}" 
+            class="google wc-img-replace" target="_blank">Google</a>
+    </li>
+    {% endif %}
+
+    {% if site.positive.social.dribble %}
+    <li>
+        <a title="{{ site.positive.social.dribble }} on Dribble" 
+            href="https://dribbble.com/{{ site.positive.social.dribble }}" 
+            class="dribble wc-img-replace" target="_blank">Dribble</a>
+    </li> 
+    {% endif %}
+
+    {% if site.positive.social.pinterest %}
+    <li>
+        <a title="{{ site.positive.social.pinterest }} on Pinterest" 
+            href="https://www.pinterest.com/{{ site.positive.social.pinterest }}" 
+            class="pinterest wc-img-replace" target="_blank">Pinterest</a>
+    </li> 
+    {% endif %}
+
+</ul>
