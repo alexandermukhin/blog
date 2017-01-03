@@ -1,37 +1,12 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>{% if page.title %}{{ page.title }}{% else %}{{ site.positive.name }}{% endif %}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">        
-        <meta name="description" content="{% if page.meta_description %}{{ page.meta_description }}{% else %}{{ site.positive.meta_description }}{% endif %}">
-        <link rel="canonical" 
-        href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
-        
-        <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/assets/css/main.css">
-    </head>
+    {% include header.html %}
     <body>
-        <header class="main-header">
-            <div class="wc-container">
-                <h1><a href="{{ site.baseurl }}/">{{ site.positive.name }}</a></h1>
-                {% include header-links.html %}                
-            </div>
-        </header>
+        {% include navigation.html %}
+
         {{ content }}
-        <footer class="main-footer">
-            <div class="wc-container">
-                <div class="column one">
-                    {% include footer-links.html %}                    
-                </div>
-                <div class="column two">
-                    {% include social.html %}
-                </div>
-            </div>
-            <p class="wc-container disclaimer">
-                {% include footer.html %}
-            </p>
-        </footer>
+
+        {% include footer.html %}        
         <script type="text/javascript">
           /* To avoid render blocking css */
           var cb = function() {
