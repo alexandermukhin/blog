@@ -16,6 +16,8 @@
 // Import syntax 
 @import "partials/syntax";
 
+// Import user-defined
+@import "partials/user-defined";
 
 /* -------------------------------- 
 
@@ -312,7 +314,7 @@ div.page-content {
       li {         
         @include font-size(16px);  
         line-height: 1.5;
-        background-position: 0 7px; 
+        background-position: 0 9px;
       }
     }
   }
