@@ -21,7 +21,11 @@ layout: default
             </span> |
             {% endif %}
             <span class="post-date">
-            {{ post.date | date: "%b %-d, %Y" }} 
+							{% if site.lang == "en" %}
+  							{{ post.date | date: "%b %-d, %Y" }} 
+							{% elsif site.lang == "ru" %}
+								{{ post.date | date: "%d.%m.%Y" }} 
+							{% endif %}
             </span>
           </p>          
     			    			
@@ -30,7 +34,7 @@ layout: default
   				</p>
   				<p>
   					<a href="{{ post.url | prepend: site.baseurl | prepend: site.url }}" title="{{ post.title}}">
-  						Read More
+  						{% translate global.read_more %}
 					</a>
   				</p>
   			</div>
@@ -39,7 +43,7 @@ layout: default
 	<div class="post-footer">
 		<div class="column-full">
 		<!--{% include paginator.html %}-->
-		<a href="{{ '/blog' | prepend: site.baseurl | prepend: site.url }}">Blog archive</a>
+		<a href="{{ '/blog' | prepend: site.baseurl | prepend: site.url }}">{% translate global.blog_archive %}</a>
 		</div>
 	</div>
 </div>
