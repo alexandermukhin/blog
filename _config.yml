@@ -31,7 +31,9 @@ permalink: pretty
 positive:
     name: Positive.JS
 
-gems: [jekyll-paginate]
+gems: 
+  - jekyll-paginate
+  - jekyll-multiple-languages-plugin
 
 exclude:
   - Gemfile
@@ -43,3 +45,5 @@ sass:
 
 paginate: 1
 paginate_path: "/page/:num"
+languages: ["ru", "en"]
+exclude_from_localizations: ["javascript", "images", "css"]
