@@ -1,0 +1,22 @@
+language: ruby
+rvm:
+- 2.2
+script:
+- bundle exec jekyll build
+after_success:
+- git clone https://$GITHUB_REPO
+- cd $(basename ${GITHUB_REPO%.git})
+- git config user.name "Travis CI"
+- git config user.email ${EMAIL}
+- rsync -az --delete --exclude '.git*' ../_site/ .
+- touch .nojekyll
+- git add -A .
+- git commit -m "Generated Jekyll site by Travis CI - ${TRAVIS_BUILD_NUMBER}"
+- git push --force "https://${DEPLOY_KEY}@${GITHUB_REPO}" HEAD:${REPO_TARGET_BRANCH}
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  - GITHUB_REPO: github.com/alexandermukhin/fost.github.io.git
+  - REPO_TARGET_BRANCH: gh-pages
+  - secure: oVMnR4DWZARW5nUdc8BK/eHkKyPbizxgufICfSibmXoMNUzu0XvlHDz4YC3F6JEsgXoX3hcMdB6QJbax9rjrT3cOd1+2r5E2n6BQeGaHW8LcCTBQggqYCL0rNfAt5m+mLOARA9ctk8pGLzXdcjsG7pFHHuDyaKwljW+ZqoBbIZE0Btal/xxOYLsfe87kUKkiNQ6lG9KpfvWSDjV6tl3MczLdCxGZONRHTbA3f6kZ++ayRvXrQR1OE0Y3oXv85RE4+fzBmeZqtzJGDSAi2fM7wALxyZU0vFxwjz7W8s/IaUlOQeuHgJzBfzJlYb2+PdfUk/3phNltQvLxkTxnFOatMOPm4v0V2st+ft2jIY+lS8Mj3bhU9YTeRTLE5pj7axXyZNwc5P+4W9AEmU6M7G2tbUxgfA16M2Cof4o1VRCdS/pRfSeImnTN6+Bekz0dcg5OxbbrBxrtqjX9gdXFoyOxMN6dDpDIeUD33Ieu2JsxIF+R+0seNsMwO3Jv5wysD8C94j0SVJVO16LmdhQg9g4zu65t1mJ9f+bHqpxB5Mh3IWNkGYv6iRgunpBPm5vzz+ji0j7y156ggZEA/o6OzcXbo814mpqMDwFQF78lC9B1DyvUwKulRGtDaqRqlGYYrICUptdnGNfUYl5F4VjIGcpRrJgFwXQoPDmFg/5N3X5SzNY=
+  - secure: QgMxMWEmX/Ks3vxk0ei7/OiJLXY9Dr3riEhMqul4VWSB/NUt3v/sudItxR6iMVX6frHxyk7maQSKMJZl+Dnxp8svPa2Dr9dWivJDaVaphDYn6cQEZBaTk+o3RNve7qMMSEJrkWNIQMafEpMtFWqowGYjD4MH0PROtT4VCisdA320XUegDtzecgHGjRxWISc/+fXTB069DwD9wzQIYsGBEIFs9518EhrjS5XJxwulGi1aHjxWVqTZdaLFXftBuNrjO+e2299mKNrYz2d+1iYBeQqUWOpNWqt5pIozxJWTYq8A3QuWtLhuHp/vXmYNWN1XKamF+Q9xtMTtLI9Cv5oXBdD1vJlftXPcKf5h98VCd33ydl0JpLp/nK3SpJsn0UoOiBgByBd8AvdM2tMCEVYUCiCU8FKrBW3MoFfKkfedn9WQXEbOk2MEWRob+WwpU3sxXp7s8FQDYhSn2d9eSyIcHI5hlNaquPxBQxZW/QedWQYsEc5OBb9cVB5cBB9Q2+1jPs/mpByjJMggSkLysFeucvSBSH7Mz87+XrpWbUhJTH6pwyJ29GsoZZsDMR9stkA+zpmRpVMjvVCKi1eK1iLxTpiXqbqQFmJCByLuEhoKVJMun9bqh+v+q4YEQecA3dIAD7L5WDfmXJpAFK/rw9ACCJ4xEUUhzTol168cI7j83Gw=
