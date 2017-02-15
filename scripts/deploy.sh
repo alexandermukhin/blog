@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -ev
+
 git clone https://$GITHUB_REPO
 cd $(basename ${GITHUB_REPO%.git})
 git config user.name "Travis CI"
