@@ -1,8 +1,8 @@
 language: ruby
 rvm:
 - 2.2
-script:
-- bundle exec jekyll build
+script: 
+  - ./scripts/build.sh
 after_success:
 - git clone https://$GITHUB_REPO
 - cd $(basename ${GITHUB_REPO%.git})
