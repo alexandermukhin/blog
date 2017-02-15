@@ -12,7 +12,7 @@ script:
 deploy:
   provider: script
   script: ./scripts/deploy.sh
-  skip_cleanup: false
+  skip_cleanup: true
   on:
     branch: master
 
