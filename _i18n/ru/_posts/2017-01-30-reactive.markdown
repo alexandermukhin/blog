@@ -6,7 +6,7 @@ description: Введение в реактивное программирова
 categories:
 - rxjs
 - tutorial
-- 10 min read
+- 10 мин чтения
 permalink: rxjs/reactive
 ---
 
