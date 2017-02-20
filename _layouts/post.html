@@ -9,9 +9,13 @@ layout: default
 		<p class="post-meta">
 			{% if page.categories.size > 0 %}
 				<span class="categories">
-				{{ page.categories | array_to_sentence_string }}
+				{% if site.lang == "en" %}
+					{{ page.categories | array_to_sentence_string: 'and' }}
+				{% elsif site.lang == "ru" %}
+					{{ page.categories | array_to_sentence_string: 'и' }}
+				{% endif %}
 				</span> |
-	    	{% endif %}
+	    	        {% endif %}
 			<span class="post-date">
 				{% if site.lang == "en" %}
   					{{ page.date | date: "%b %-d, %Y" }} 
