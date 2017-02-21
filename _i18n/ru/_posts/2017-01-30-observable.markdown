@@ -6,7 +6,7 @@ description: RxJS Observable
 categories:
 - rxjs
 - tutorial
-- 10 min read
+- 10 мин чтения
 permalink: rxjs/observable
 ---
 
