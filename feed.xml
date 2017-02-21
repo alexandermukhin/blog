@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="ru"><generator uri="http://jekyllrb.com" version="3.4.0">Jekyll</generator><link href="/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="/blog/" rel="alternate" type="text/html" hreflang="ru" /><updated>2017-02-21T21:40:20+00:00</updated><id>/blog/</id><title type="html">Your awesome title</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+</subtitle><entry><title type="html">RxJS - Часть 1, Введение в реактивное программирование</title><link href="/blog/rxjs/reactive" rel="alternate" type="text/html" title="RxJS - Часть 1, Введение в реактивное программирование" /><published>2017-01-30T00:00:00+00:00</published><updated>2017-01-30T00:00:00+00:00</updated><id>/blog/rxjs/reactive</id><content type="html" xml:base="/blog/rxjs/reactive">&lt;h2 id=&quot;a--b--c&quot;&gt;A = B + C&lt;/h2&gt;
+&lt;p&gt;В современном мире сложных высоконагруженных веб приложений, где компоненты одной страницы исчисляются десятками, 
+а изменение состояния одного из них порождает цепочку различных событий по всему приложению, существует 
+закономерная проблема отслеживания таких изменений и управления ими. К решению этой проблемы, а именно к осмыслению
+приложения, построению взаимодействия внутри него и, наконец, написанию кода, можно подойти с разных сторон, однако
+интуитивно логичнее и чище в этом случае выглядит парадигма реактивного программирования.&lt;/p&gt;
+
+&lt;p&gt;Существует множество определений понятия реактивности, которые разнятся от запутанных до очень запутанных
+ и, поначалу, не вносят особой ясности. Хотя, если говорить абстракциями, все не так уж и сложно: &lt;code class=&quot;highlighter-rouge&quot;&gt;A = B + C&lt;/code&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;В случае императивного программирования после момента присваивания, переменная A будет
+ существовать независимо от B и С на всем протяжении жизненного цикла программы, в то время как в реактивном 
+ программировании при изменении B или C, значение A будет автоматически пересчитано&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Получается, практически все в нашем вышеописанном приложении подчиняется реактивному поведению, а обработкой такого 
+ поведения как раз и занимается реактивное программирование. &lt;strong&gt;Реактивное программирование - обработка параллельных потоков данных&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;Потоки&quot;&gt;Потоки&lt;/h2&gt;
+
+&lt;p&gt;Поток данных не что иное, как событие, повторяющеесе во времени. Для начала, можно представить в виде
+ потока последовательность кликов пользователя:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/assets/images/stream-base.png&quot; alt=&quot;поток&quot; class=&quot;center&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Инициируемые в потоке события можно разделить на три типа: &lt;code class=&quot;highlighter-rouge&quot;&gt;значение&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;ошибка&lt;/code&gt; и &lt;code class=&quot;highlighter-rouge&quot;&gt;завершение потока&lt;/code&gt;.
+В нашем примере завершением будет закрытие пользователем страницы. Поток может получать бесконечное 
+количество событий и в то же время, любое единичное событие может быть представлено в виде потока (тот же самый клик).&lt;/p&gt;
+
+&lt;p&gt;Поток выше изображен в виде &lt;a href=&quot;http://rxmarbles.com/&quot;&gt;марбл-диаграммы&lt;/a&gt;, но есть и альтернативный способ 
+визуализации событий - c помощью ASCII кодировки. RxJS 5 позволяет использовать такие диаграммы 
+при написании тестов (&lt;a href=&quot;http://reactivex.io/rxjs/test-file/spec-js/observables/combineLatest-spec.js.html#lineNumber7&quot;&gt;Observable.combineLatest.spec&lt;/a&gt;)&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; --a---b-c---d---X---|-&amp;gt;
+ 
+ a, b, c, d события значения
+ X ошибка
+ | завершение потока
+ ---&amp;gt; шкала времени
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Помимо &lt;em&gt;кликов&lt;/em&gt;, веб приложение, как правило, должно уметь оперировать множеством как синхронных, так и асинхронных 
+событий, каждые из которых, в свою очередь, могут быть однократными и многократными. К асинхронным событиям можно отнести:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;UI события, любое взаимодействие пользователя с интерфейсом&lt;/li&gt;
+  &lt;li&gt;Запросы к серверу&lt;/li&gt;
+  &lt;li&gt;События устройства, пуш уведомления, системные нотификации&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Webhook&quot;&gt;Веб хуки&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Асинхронное событие - событие, которое произойдет в какой-либо неопределенный момент в будущем&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Есть и другие варианты объяснения асинхронности, например, с использованием &lt;a href=&quot;http://stackoverflow.com/a/4560233/4486673&quot;&gt;пиццы и World of Warcraft&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Повторение любого из вышеперичисленных асинхронных событий довольно просто представить в формате потока данных за промежуток времени. 
+Сложнее мыслить &lt;em&gt;реактивно&lt;/em&gt; в отношении синхронных, последовательных событий, которыми является, например, &lt;code class=&quot;highlighter-rouge&quot;&gt;массив&lt;/code&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
+    &lt;span class=&quot;nx&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// событие-значение &lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Перебрав массив из 5 элементов, мы определили синхронный поток, в котором были инициированы 5 событий &lt;em&gt;значение&lt;/em&gt;
+и одно &lt;em&gt;завершение потока&lt;/em&gt;. Процесс аналогичен сессии пользователя, который 5 раз кликнул по кнопке и закрыл страницу.
+Таким же образом в роли последовательного потока может выступать не только массив, но любой итерабельной объект: &lt;code class=&quot;highlighter-rouge&quot;&gt;Set&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;Map&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;String&lt;/code&gt; и т.д.&lt;/p&gt;
+
+&lt;p&gt;Если посмотреть еще шире, можно переложить эту же концепцию на реальную жизнь и представить в виде потока такие 
+синхронные события как сон, чтение книги, поездка в автобусе и асинхронные - момент закипания чайника, заказ еды на дом. Конечно,
+ синхронность или асинхронность того или иного события можно обсуждать и это весьма интересно, но тем не менее,
+становится понятно, что представить в виде потока можно все, что угодно. И это подводит нас к главной мантре реактивного программирования:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/assets/images/stream-dog.jpeg&quot; alt=&quot;Все - поток&quot; class=&quot;center&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;Чем-обрабатывать-потоки&quot;&gt;Чем обрабатывать потоки?&lt;/h2&gt;
+
+&lt;p&gt;Как мы выяснили, наше приложение - инкубатор всевозможных потоков. Давайте поверхностно рассмотрим средства их обработки.
+Далее речь пойдет об асинхронных событиях, про варианты обработки синхронных событий можно посмотреть здесь: 
+ &lt;a href=&quot;https://lodash.com/docs/&quot;&gt;Lodash&lt;/a&gt;, &lt;a href=&quot;http://ramdajs.com/docs/&quot;&gt;Ramda&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/EventTarget&quot;&gt;EventTarget&lt;/a&gt; интерфейс обработки различных UI событий в javascript.
+Клик пользователя, например, можно поймать следующим образом:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight margin-no_top&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getElementById&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'button'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'click'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// обработка&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://nodejs.org/api/events.html&quot;&gt;EventEmitter&lt;/a&gt; используется при построении асинхронно-событийной архитектуры в Node.js&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight margin-no_top&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt; &lt;span class=&quot;kr&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;emitter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;EventEmitter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+ 
+ &lt;span class=&quot;nx&quot;&gt;emitter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;on&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'event'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// обработка&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+ 
+ &lt;span class=&quot;nx&quot;&gt;emitter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'event'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// пуш события&lt;/span&gt;
+ &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://callbackhell.com/&quot;&gt;Функции обратного вызова&lt;/a&gt; как вариант обработки однократного асинхронного события, например, чтения файла&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight margin-no_top&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;  &lt;span class=&quot;kr&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// событие-ошибка&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      
+      &lt;span class=&quot;c1&quot;&gt;// событие-значения&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+   
+  &lt;span class=&quot;nx&quot;&gt;fs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;readFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'data.txt'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; 
+ &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise&quot;&gt;Promise&lt;/a&gt; так же используются
+ для однократных асинхронных вычислений&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight margin-no_top&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kr&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;request&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Promise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;resolve&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;reject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// имитация запроса к серверу&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setTimeout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;resolve&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;request&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// событие-значения &lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// событие-ошибка &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*&quot;&gt;Генераторы&lt;/a&gt; - функции с 
+возможностью приостановить свое выполнение на некоторое время, после чего возобновить вновь. Своего рода имплементация
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Coroutine&quot;&gt;корутин&lt;/a&gt; в javascript, позволяющая писать асинхронный код в синхронном стиле&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight margin-no_top&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;ajaxCall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;yield&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'http://some.url'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;kr&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// событие-значение&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kr&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API&quot;&gt;Web sockets&lt;/a&gt; и &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers&quot;&gt;Web workers&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;И экспериментальные, еще не принятые на сегодняшний день в стандарт инструменты, которые, тем не менее, 
+можно использовать посредством &lt;a href=&quot;https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-regenerator&quot;&gt;Babel полифиллов&lt;/a&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/tc39/ecmascript-asyncawait&quot;&gt;Async functions&lt;/a&gt; были предложены как часть стандарта ES2016. 
+В данный момент фича находится на завершающем этапе принятия - Stage 4. Подробно с асинхронными функциями можно 
+ознакомиться в соответствующем &lt;a href=&quot;https://tc39.github.io/ecmascript-asyncawait/&quot;&gt;предложении&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/jhusain/asyncgenerator&quot;&gt;Async generators&lt;/a&gt; изначально были задуманы для реализации обработки многократных 
+асинхронных событий. В данный момент фича получила более компактное описание на &lt;a href=&quot;https://github.com/tc39/proposal-async-iteration&quot;&gt;Stage 3&lt;/a&gt;,&lt;br /&gt;
+но, возможно, будет реализована в виде &lt;a href=&quot;https://github.com/tc39/proposal-observable&quot;&gt;ECMAScript Observable&lt;/a&gt; - имплементации 
+Observable для стандарта ES2016 (теме Observable посвещена следующая статья из этой серии)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;Причем-тут-rxjs&quot;&gt;Причем тут RxJS?&lt;/h2&gt;
+&lt;p&gt;Было бы удобно иметь единый интерфейс взаимодействия с любым средством событийной обработки. И такой интерфейс
+предоставляет бибилиотека &lt;a href=&quot;https://github.com/ReactiveX/rxjs&quot;&gt;RxJS&lt;/a&gt; (Reactive Extensions for Javascript).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/assets/images/rx-logo.png&quot; alt=&quot;rxjs-logo&quot; class=&quot;center rx-logo&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;С ее помощью возможно комбинировать между собой потоки различных типов данных, преобразовывать их, отменять, приводить к определенному типу,
+и многое другое. Об этом мы поговорим в следующей статье,
+в которой рассмотрим &lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt; - сущность, которую RxJS использует в качестве потока данных.&lt;/p&gt;
+
+&lt;h2 id=&quot;Почитать-и-посмотреть-по-теме&quot;&gt;Почитать и посмотреть по теме&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/staltz/868e7e9bc2a7b8c1f754&quot;&gt;The introduction to Reactive Programming you’ve been missing&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://learn.javascript.ru/events-and-interfaces&quot;&gt;Основы работы с событиями&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://egghead.io/courses/mastering-asynchronous-programming-the-end-of-the-loop&quot;&gt;Asynchronous Programming: The End of The Loop&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://davidwalsh.name/es6-generators&quot;&gt;The Basics Of ES6 Generators&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">A = B + C В современном мире сложных высоконагруженных веб приложений, где компоненты одной страницы исчисляются десятками, а изменение состояния одного из них порождает цепочку различных событий по всему приложению, существует закономерная проблема отслеживания таких изменений и управления ими. К решению этой проблемы, а именно к осмыслению приложения, построению взаимодействия внутри него и, наконец, написанию кода, можно подойти с разных сторон, однако интуитивно логичнее и чище в этом случае выглядит парадигма реактивного программирования.</summary></entry><entry><title type="html">RxJS - Часть 2, Observable</title><link href="/blog/rxjs/observable" rel="alternate" type="text/html" title="RxJS - Часть 2, Observable" /><published>2017-01-30T00:00:00+00:00</published><updated>2017-01-30T00:00:00+00:00</updated><id>/blog/rxjs/observable</id><content type="html" xml:base="/blog/rxjs/observable">&lt;p&gt;test&lt;/p&gt;</content><author><name></name></author><summary type="html">test</summary></entry></feed>
