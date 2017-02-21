@@ -17,7 +17,11 @@ layout: default
           <p class="post-meta">
             {% if post.categories.size > 0 %}
             <span class="categories">
-            {{ post.categories | array_to_sentence_string }}
+            {% if site.lang == "en" %}
+		{{ page.categories | array_to_sentence_string: 'and' }}
+	    {% elsif site.lang == "ru" %}
+		{{ page.categories | array_to_sentence_string: 'и' }}
+            {% endif %}
             </span> |
             {% endif %}
             <span class="post-date">
