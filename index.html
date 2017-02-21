@@ -17,9 +17,9 @@ layout: default
             {% if post.categories.size > 0 %}
                 <span class="categories">
                 {% if site.lang == "en" %}
-                    {{ page.categories | array_to_sentence_string: 'and' }}
+                    {{ post.categories | array_to_sentence_string: 'and' }}
                 {% elsif site.lang == "ru" %}
-                    {{ page.categories | array_to_sentence_string: 'и' }}
+                    {{ post.categories | array_to_sentence_string: 'и' }}
                 {% endif %}
             </span> |
             {% endif %}
